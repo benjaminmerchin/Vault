@@ -12,15 +12,21 @@ import { VaultLogo } from "@/components/brand/logo";
 import { SiteNav } from "@/components/site-nav";
 import { DemoButton } from "@/components/auth/demo-button";
 import { BlurFade } from "@/components/ui/blur-fade";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata = {
   title: "How privacy works — Vault",
 };
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <div className="relative flex min-h-screen flex-col bg-black text-white">
-      <SiteNav />
+      <SiteNav authed={!!user} />
 
       <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-20">
         <BlurFade inView>

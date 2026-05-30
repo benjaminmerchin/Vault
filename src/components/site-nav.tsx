@@ -13,7 +13,7 @@ const LINKS = [
   { href: "/privacy", label: "Privacy" },
 ];
 
-export function SiteNav() {
+export function SiteNav({ authed = false }: { authed?: boolean }) {
   const pathname = usePathname();
   return (
     <header className="sticky top-0 z-30 w-full border-b border-white/5 bg-black/60 backdrop-blur-md">
@@ -39,21 +39,32 @@ export function SiteNav() {
           })}
         </nav>
         <div className="flex items-center gap-2">
-          <Link href="/login">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden h-9 rounded-full px-4 text-white/80 hover:bg-white/10 hover:text-white sm:inline-flex"
-            >
-              Sign in
-            </Button>
-          </Link>
-          <Link href="/signup">
-            <Button size="sm" className="h-9 rounded-full px-4">
-              Open Vault
-              <ArrowRight className="ml-0.5 size-3.5" />
-            </Button>
-          </Link>
+          {authed ? (
+            <Link href="/dashboard">
+              <Button size="sm" className="h-9 rounded-full px-4">
+                Go to dashboard
+                <ArrowRight className="ml-0.5 size-3.5" />
+              </Button>
+            </Link>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hidden h-9 rounded-full px-4 text-white/80 hover:bg-white/10 hover:text-white sm:inline-flex"
+                >
+                  Sign in
+                </Button>
+              </Link>
+              <Link href="/signup">
+                <Button size="sm" className="h-9 rounded-full px-4">
+                  Open Vault
+                  <ArrowRight className="ml-0.5 size-3.5" />
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

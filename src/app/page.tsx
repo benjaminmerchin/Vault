@@ -22,6 +22,7 @@ import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { Marquee } from "@/components/ui/marquee";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/server";
 
 const GUARANTEES = [
   { icon: Lock, label: "AES-256-GCM encrypted" },
@@ -94,10 +95,15 @@ export default async function Landing({
   const { code } = await searchParams;
   if (code) redirect(`/auth/callback?code=${code}&next=/dashboard`);
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
   return (
     <div className="relative flex min-h-screen flex-col bg-black text-white">
       {/* Nav */}
-      <SiteNav />
+      <SiteNav authed={!!user} />
 
       {/* Hero */}
       <section className="relative isolate flex flex-1 items-center overflow-hidden">
