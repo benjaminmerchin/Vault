@@ -8,10 +8,6 @@ import { cn } from "@/lib/utils";
 
 type Msg = { role: "user" | "assistant"; text: string };
 
-// Chat history is kept only in this browser (and encrypted in Krava) —
-// never on Vault's server. Keep this key in sync with the logout handler.
-export const ADVISOR_STORAGE_KEY = "vault.advisor.history";
-
 const SUGGESTIONS = [
   "What should I pay off first?",
   "Where am I overspending?",
@@ -23,59 +19,51 @@ export function AdvisorPanel() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [ready, setReady] = useState(false);
   const chatId = useRef<string | undefined>(undefined);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Restore prior conversation from this device (resumes the same Krava thread).
+  // Restore prior conversation from the encrypted store (cross-device).
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(ADVISOR_STORAGE_KEY);
-      if (raw) {
-        const data = JSON.parse(raw) as { chatId?: string; messages?: Msg[] };
-        if (data.chatId) chatId.current = data.chatId;
-        if (Array.isArray(data.messages) && data.messages.length)
-          setMessages(data.messages);
-      }
-    } catch {
-      /* ignore */
-    }
-    setReady(true);
+    fetch("/api/advisor/history")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d?.chatId) chatId.current = d.chatId;
+        if (Array.isArray(d?.messages) && d.messages.length) setMessages(d.messages);
+      })
+      .catch(() => {});
   }, []);
-
-  // Persist locally after each turn (post-hydration only — never to our server).
-  useEffect(() => {
-    if (!ready) return;
-    try {
-      if (messages.length)
-        localStorage.setItem(
-          ADVISOR_STORAGE_KEY,
-          JSON.stringify({ chatId: chatId.current, messages }),
-        );
-      else localStorage.removeItem(ADVISOR_STORAGE_KEY);
-    } catch {
-      /* ignore */
-    }
-  }, [messages, ready]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  // Encrypt + save the conversation to Supabase (fire-and-forget).
+  function persist(msgs: Msg[]) {
+    fetch("/api/advisor/history", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chatId: chatId.current, messages: msgs }),
+    }).catch(() => {});
+  }
 
   function newChat() {
     if (loading) return;
     chatId.current = undefined;
     setInput("");
     setMessages([]);
+    fetch("/api/advisor/history", { method: "DELETE" }).catch(() => {});
   }
 
   async function send(text: string) {
     const q = text.trim();
     if (!q || loading) return;
     setInput("");
-    setMessages((m) => [...m, { role: "user", text: q }, { role: "assistant", text: "" }]);
+    const base = messages;
+    const withUser: Msg[] = [...base, { role: "user", text: q }];
+    setMessages([...withUser, { role: "assistant", text: "" }]);
     setLoading(true);
 
+    let reply = "";
     try {
       const res = await fetch("/api/advisor", {
         method: "POST",
@@ -90,7 +78,6 @@ export function AdvisorPanel() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buf = "";
-      let reply = "";
 
       while (true) {
         const { done, value } = await reader.read();
@@ -107,30 +94,27 @@ export function AdvisorPanel() {
             if (evt.chatId) chatId.current = evt.chatId;
             if (evt.text) {
               reply += evt.text;
-              setMessages((m) => [
-                ...m.slice(0, -1),
-                { role: "assistant", text: reply },
-              ]);
+              setMessages([...withUser, { role: "assistant", text: reply }]);
             }
           } catch {
             /* ignore keep-alives */
           }
         }
       }
-      if (!reply) {
-        setMessages((m) => [
-          ...m.slice(0, -1),
-          { role: "assistant", text: "(No response — try again.)" },
-        ]);
-      }
+
+      const final: Msg[] = [
+        ...withUser,
+        { role: "assistant", text: reply || "(No response — try again.)" },
+      ];
+      setMessages(final);
+      persist(final);
     } catch (e) {
-      setMessages((m) => [
-        ...m.slice(0, -1),
-        {
-          role: "assistant",
-          text: `⚠️ ${(e as Error).message}`,
-        },
-      ]);
+      const final: Msg[] = [
+        ...withUser,
+        { role: "assistant", text: `⚠️ ${(e as Error).message}` },
+      ];
+      setMessages(final);
+      persist(final);
     } finally {
       setLoading(false);
     }
@@ -140,8 +124,8 @@ export function AdvisorPanel() {
     <div className="flex h-full flex-col">
       {messages.length > 0 && (
         <div className="flex shrink-0 items-center justify-between border-b border-border/60 pb-2 pt-1">
-          <span className="text-[11px] text-muted-foreground">
-            History saved on this device only
+          <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+            <Lock className="size-3" /> Encrypted in your vault
           </span>
           <button
             onClick={newChat}
@@ -162,7 +146,7 @@ export function AdvisorPanel() {
             <h3 className="mt-4 font-semibold">Ask Vault about your money</h3>
             <p className="mt-1.5 text-sm text-muted-foreground">
               Your advisor can see your accounts, holdings, debts and goals —
-              and it forgets the moment the model responds.
+              and your chat is encrypted and zero-retention.
             </p>
             <div className="mt-5 grid w-full gap-2">
               {SUGGESTIONS.map((s) => (

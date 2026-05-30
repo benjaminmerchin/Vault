@@ -88,6 +88,20 @@ drop policy if exists owner_all on public.plaid_items;
 create policy owner_all on public.plaid_items
   using (user_id = auth.uid()) with check (user_id = auth.uid());
 
+-- Advisor chat history. Stored as AES-256-GCM ciphertext only (encrypted by
+-- the app before insert) — the database never holds plaintext messages.
+create table if not exists public.advisor_chats (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  chat_id text,
+  payload text not null,   -- base64(ciphertext || authTag)
+  iv text not null,        -- base64(iv)
+  updated_at timestamptz not null default now()
+);
+alter table public.advisor_chats enable row level security;
+drop policy if exists owner_all on public.advisor_chats;
+create policy owner_all on public.advisor_chats
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+
 do $$
 declare t text;
 begin
