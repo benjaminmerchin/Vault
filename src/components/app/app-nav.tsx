@@ -2,19 +2,10 @@
 
 import Link from "next/link";
 import { useTransition } from "react";
-import { LogOut, Sparkles, ShieldCheck } from "lucide-react";
+import { LogOut, ShieldCheck } from "lucide-react";
 import { signOutAction } from "@/lib/actions/auth";
 import { VaultLogo } from "@/components/brand/logo";
-import { AdvisorPanel } from "@/components/advisor/advisor-panel";
-import { PrivacyPill } from "@/components/privacy-pill";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,8 +27,8 @@ export function AppNav({
   const initials = (name || email).slice(0, 2).toUpperCase();
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5">
+    <header className="z-30 shrink-0 border-b border-border/60 bg-background/70 backdrop-blur-xl">
+      <div className="flex h-16 w-full items-center justify-between px-5">
         <Link href="/dashboard">
           <VaultLogo />
         </Link>
@@ -49,30 +40,6 @@ export function AppNav({
               Privacy
             </Button>
           </Link>
-
-          <Sheet>
-            <SheetTrigger render={<Button size="sm" className="gap-1.5" />}>
-              <Sparkles className="size-4" />
-              Ask Vault
-            </SheetTrigger>
-            <SheetContent
-              side="right"
-              className="flex w-full flex-col gap-0 p-0 sm:max-w-md"
-            >
-              <SheetHeader className="border-b border-border px-5 py-4">
-                <SheetTitle className="flex items-center gap-2">
-                  <Sparkles className="size-4 text-primary" />
-                  Vault Advisor
-                </SheetTitle>
-                <PrivacyPill icon="lock" className="mt-1 w-fit">
-                  End-to-end encrypted · zero-retention
-                </PrivacyPill>
-              </SheetHeader>
-              <div className="min-h-0 flex-1 px-4">
-                <AdvisorPanel />
-              </div>
-            </SheetContent>
-          </Sheet>
 
           <DropdownMenu>
             <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { AppNav } from "@/components/app/app-nav";
+import { Workspace } from "@/components/app/workspace";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({
@@ -25,9 +26,11 @@ export default async function AppLayout({
     null;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-screen flex-col overflow-hidden">
       <AppNav email={user.email ?? ""} name={name} />
-      <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-8">{children}</main>
+      <div className="min-h-0 flex-1">
+        <Workspace>{children}</Workspace>
+      </div>
     </div>
   );
 }

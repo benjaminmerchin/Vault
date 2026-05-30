@@ -8,11 +8,15 @@ function Progress({
   className,
   children,
   value,
+  locale = "en-US",
+  getAriaValueText = (_formatted, v) => `${v ?? 0}%`,
   ...props
 }: ProgressPrimitive.Root.Props) {
   return (
     <ProgressPrimitive.Root
       value={value}
+      locale={locale}
+      getAriaValueText={getAriaValueText}
       data-slot="progress"
       className={cn("flex flex-wrap gap-3", className)}
       {...props}
