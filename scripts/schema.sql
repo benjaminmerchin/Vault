@@ -72,6 +72,22 @@ alter table public.transactions enable row level security;
 alter table public.holdings     enable row level security;
 alter table public.goals        enable row level security;
 
+-- Plaid item link. access_token is per-user and kept private via RLS.
+create table if not exists public.plaid_items (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  item_id text not null,
+  access_token text not null,
+  institution_name text,
+  cursor text,
+  created_at timestamptz not null default now()
+);
+create index if not exists idx_plaid_items_user on public.plaid_items(user_id);
+alter table public.plaid_items enable row level security;
+drop policy if exists owner_all on public.plaid_items;
+create policy owner_all on public.plaid_items
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+
 do $$
 declare t text;
 begin

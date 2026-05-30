@@ -15,6 +15,7 @@ import { fmtMoney, fmtPct, fmtDate, categoryColor } from "@/lib/format";
 import { NetWorthChart } from "@/components/dashboard/networth-chart";
 import { SpendingChart, type SpendSlice } from "@/components/dashboard/spending-chart";
 import { LoadSampleButton } from "@/components/dashboard/load-sample-button";
+import { ConnectBankButton } from "@/components/dashboard/connect-bank-button";
 import { NumberTicker } from "@/components/ui/number-ticker";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { PrivacyPill } from "@/components/privacy-pill";
@@ -56,11 +57,12 @@ export default async function DashboardPage() {
             Your vault is empty
           </h1>
           <p className="mx-auto mt-2 max-w-sm text-muted-foreground">
-            Load a realistic sample portfolio to explore Vault and chat with
-            your private AI advisor.
+            Connect a bank with Plaid to pull in your real accounts — or load a
+            realistic sample portfolio to explore Vault and its private advisor.
           </p>
-          <div className="mt-6 flex justify-center">
-            <LoadSampleButton />
+          <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <ConnectBankButton label="Connect a bank" size="lg" />
+            <LoadSampleButton label="Load sample data" size="lg" variant="outline" />
           </div>
         </div>
       </div>
@@ -106,7 +108,10 @@ export default async function DashboardPage() {
           <p className="text-sm text-muted-foreground">Welcome back, {firstName}</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight">Your money, privately</h1>
         </div>
-        <PrivacyPill icon="shield">Private vault · only you can read this</PrivacyPill>
+        <div className="flex items-center gap-3">
+          <ConnectBankButton variant="outline" size="sm" />
+          <PrivacyPill icon="shield">Private vault</PrivacyPill>
+        </div>
       </div>
 
       {/* Top row: net worth + spending */}

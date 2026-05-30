@@ -10,14 +10,17 @@ import { Button } from "@/components/ui/button";
 export function LoadSampleButton({
   label = "Load a sample portfolio",
   size = "lg",
+  variant = "default",
 }: {
   label?: string;
   size?: "default" | "sm" | "lg";
+  variant?: "default" | "outline" | "secondary";
 }) {
   const [pending, start] = useTransition();
   const router = useRouter();
   return (
     <Button
+      variant={variant}
       size={size}
       disabled={pending}
       onClick={() =>
