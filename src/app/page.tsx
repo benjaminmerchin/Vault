@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   ArrowRight,
   Lock,
@@ -82,7 +83,16 @@ const FEATURES = [
   },
 ];
 
-export default function Landing() {
+export default async function Landing({
+  searchParams,
+}: {
+  searchParams: Promise<{ code?: string }>;
+}) {
+  // Supabase email-confirmation links land on the Site URL (/) with a PKCE code.
+  // Hand it off to the callback route to exchange it for a session.
+  const { code } = await searchParams;
+  if (code) redirect(`/auth/callback?code=${code}&next=/dashboard`);
+
   return (
     <div className="relative flex min-h-screen flex-col bg-black text-white">
       {/* Nav */}
