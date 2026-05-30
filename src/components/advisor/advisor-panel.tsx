@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Lock, SendHorizontal, ServerOff, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Markdown } from "@/components/advisor/markdown";
 import { cn } from "@/lib/utils";
 
 type Msg = { role: "user" | "assistant"; text: string };
@@ -129,13 +130,21 @@ export function AdvisorPanel() {
             >
               <div
                 className={cn(
-                  "max-w-[85%] whitespace-pre-wrap rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
+                  "max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed",
                   m.role === "user"
-                    ? "bg-primary text-primary-foreground"
+                    ? "whitespace-pre-wrap bg-primary text-primary-foreground"
                     : "bg-secondary text-secondary-foreground",
                 )}
               >
-                {m.text || (loading && i === messages.length - 1 ? <Dots /> : "")}
+                {m.role === "assistant" ? (
+                  m.text ? (
+                    <Markdown>{m.text}</Markdown>
+                  ) : loading && i === messages.length - 1 ? (
+                    <Dots />
+                  ) : null
+                ) : (
+                  m.text
+                )}
               </div>
             </div>
           ))
