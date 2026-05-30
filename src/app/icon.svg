@@ -1,6 +1,13 @@
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="7" fill="#10b981"/>
-  <path d="M16 5 L25 8.2 V15 C25 21 21 25.6 16 27 C11 25.6 7 21 7 15 V8.2 Z" fill="#04261c"/>
-  <circle cx="16" cy="14.3" r="2.3" fill="#6ee7b7"/>
-  <rect x="14.85" y="15.2" width="2.3" height="4.4" rx="1.15" fill="#6ee7b7"/>
+  <defs>
+    <linearGradient id="vault-g" x1="4" y1="3" x2="28" y2="29" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6ee7b7"/>
+      <stop offset="0.5" stop-color="#34d399"/>
+      <stop offset="1" stop-color="#14b8a6"/>
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="8" fill="url(#vault-g)"/>
+  <path d="M16 5 L25 8.4 L25 15.5 C25 21.6 20.9 26.4 16 28 C11.1 26.4 7 21.6 7 15.5 L7 8.4 Z" fill="#042f24"/>
+  <circle cx="16" cy="14.4" r="2.3" fill="#d1fae5"/>
+  <path d="M16 16.2 V20" stroke="#d1fae5" stroke-width="2.6" stroke-linecap="round"/>
 </svg>
