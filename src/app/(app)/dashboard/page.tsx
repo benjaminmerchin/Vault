@@ -17,7 +17,6 @@ import { SpendingChart, type SpendSlice } from "@/components/dashboard/spending-
 import { LoadSampleButton } from "@/components/dashboard/load-sample-button";
 import { ConnectBankButton } from "@/components/dashboard/connect-bank-button";
 import { NumberTicker } from "@/components/ui/number-ticker";
-import { BorderBeam } from "@/components/ui/border-beam";
 import { PrivacyPill } from "@/components/privacy-pill";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -116,7 +115,7 @@ export default async function DashboardPage() {
 
       {/* Top row: net worth + spending */}
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="relative overflow-hidden lg:col-span-2">
+        <Card className="lg:col-span-2">
           <CardHeader className="flex-row items-start justify-between space-y-0">
             <div>
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -148,7 +147,6 @@ export default async function DashboardPage() {
           <CardContent>
             <NetWorthChart data={trend} />
           </CardContent>
-          <BorderBeam duration={9} size={130} colorFrom="#10b981" colorTo="#5eead4" />
         </Card>
 
         <Card>

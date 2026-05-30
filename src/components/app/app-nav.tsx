@@ -10,7 +10,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -50,12 +49,12 @@ export function AppNav({
               </Avatar>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuLabel className="flex flex-col">
+              <div className="flex flex-col px-2 py-1.5">
                 <span className="text-sm font-medium">{name || "Your vault"}</span>
                 <span className="text-xs font-normal text-muted-foreground">
                   {email}
                 </span>
-              </DropdownMenuLabel>
+              </div>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 disabled={pending}
