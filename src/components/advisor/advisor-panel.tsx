@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Lock, SendHorizontal, ServerOff, Sparkles } from "lucide-react";
+import { Lock, Plus, SendHorizontal, ServerOff, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Markdown } from "@/components/advisor/markdown";
 import { cn } from "@/lib/utils";
 
 type Msg = { role: "user" | "assistant"; text: string };
+
+// Chat history is kept only in this browser (and encrypted in Krava) —
+// never on Vault's server. Keep this key in sync with the logout handler.
+export const ADVISOR_STORAGE_KEY = "vault.advisor.history";
 
 const SUGGESTIONS = [
   "What should I pay off first?",
@@ -19,12 +23,51 @@ export function AdvisorPanel() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [ready, setReady] = useState(false);
   const chatId = useRef<string | undefined>(undefined);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Restore prior conversation from this device (resumes the same Krava thread).
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(ADVISOR_STORAGE_KEY);
+      if (raw) {
+        const data = JSON.parse(raw) as { chatId?: string; messages?: Msg[] };
+        if (data.chatId) chatId.current = data.chatId;
+        if (Array.isArray(data.messages) && data.messages.length)
+          setMessages(data.messages);
+      }
+    } catch {
+      /* ignore */
+    }
+    setReady(true);
+  }, []);
+
+  // Persist locally after each turn (post-hydration only — never to our server).
+  useEffect(() => {
+    if (!ready) return;
+    try {
+      if (messages.length)
+        localStorage.setItem(
+          ADVISOR_STORAGE_KEY,
+          JSON.stringify({ chatId: chatId.current, messages }),
+        );
+      else localStorage.removeItem(ADVISOR_STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
+  }, [messages, ready]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  function newChat() {
+    if (loading) return;
+    chatId.current = undefined;
+    setInput("");
+    setMessages([]);
+  }
 
   async function send(text: string) {
     const q = text.trim();
@@ -95,6 +138,20 @@ export function AdvisorPanel() {
 
   return (
     <div className="flex h-full flex-col">
+      {messages.length > 0 && (
+        <div className="flex shrink-0 items-center justify-between border-b border-border/60 pb-2 pt-1">
+          <span className="text-[11px] text-muted-foreground">
+            History saved on this device only
+          </span>
+          <button
+            onClick={newChat}
+            className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-xs text-muted-foreground transition hover:text-foreground"
+          >
+            <Plus className="size-3.5" /> New chat
+          </button>
+        </div>
+      )}
+
       {/* messages */}
       <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto px-1 py-4">
         {messages.length === 0 ? (

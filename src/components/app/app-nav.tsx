@@ -59,11 +59,15 @@ export function AppNav({
               <DropdownMenuItem
                 disabled={pending}
                 closeOnClick={false}
-                onClick={() =>
+                onClick={() => {
+                  // clear locally-stored advisor history on sign-out
+                  try {
+                    localStorage.removeItem("vault.advisor.history");
+                  } catch {}
                   start(() => {
                     void signOutAction();
-                  })
-                }
+                  });
+                }}
               >
                 <LogOut className="size-4" />
                 Sign out
