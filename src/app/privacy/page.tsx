@@ -1,6 +1,4 @@
-import Link from "next/link";
 import {
-  ArrowLeft,
   KeyRound,
   ServerOff,
   Fingerprint,
@@ -11,8 +9,8 @@ import {
   X,
 } from "lucide-react";
 import { VaultLogo } from "@/components/brand/logo";
+import { SiteNav } from "@/components/site-nav";
 import { DemoButton } from "@/components/auth/demo-button";
-import { Button } from "@/components/ui/button";
 import { BlurFade } from "@/components/ui/blur-fade";
 
 export const metadata = {
@@ -22,30 +20,7 @@ export const metadata = {
 export default function PrivacyPage() {
   return (
     <div className="relative flex min-h-screen flex-col bg-black text-white">
-      <header className="sticky top-0 z-30 w-full border-b border-white/5 bg-black/60 backdrop-blur-md">
-        <div className="mx-auto flex h-16 w-full max-w-4xl items-center justify-between px-6">
-          <Link href="/">
-            <VaultLogo />
-          </Link>
-          <div className="flex items-center gap-2">
-            <Link href="/">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="rounded-full text-white/80 hover:bg-white/10 hover:text-white"
-              >
-                <ArrowLeft className="size-4" />
-                Home
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button size="sm" className="rounded-full px-4">
-                Open Vault
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteNav />
 
       <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-20">
         <BlurFade inView>

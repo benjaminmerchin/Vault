@@ -14,6 +14,7 @@ import {
   Fingerprint,
 } from "lucide-react";
 import { VaultLogo } from "@/components/brand/logo";
+import { SiteNav } from "@/components/site-nav";
 import { DemoButton } from "@/components/auth/demo-button";
 import { Button } from "@/components/ui/button";
 import { BlurFade } from "@/components/ui/blur-fade";
@@ -96,33 +97,7 @@ export default async function Landing({
   return (
     <div className="relative flex min-h-screen flex-col bg-black text-white">
       {/* Nav */}
-      <header className="sticky top-0 z-30 w-full border-b border-white/5 bg-black/60 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
-          <VaultLogo />
-          <nav className="hidden items-center gap-8 text-sm font-medium text-white/70 md:flex">
-            <a href="#how" className="transition hover:text-white">How it works</a>
-            <a href="#why" className="transition hover:text-white">Why Vault</a>
-            <Link href="/privacy" className="transition hover:text-white">Privacy</Link>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Link href="/login">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="hidden h-9 rounded-full px-4 text-white/80 hover:bg-white/10 hover:text-white sm:inline-flex"
-              >
-                Sign in
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button size="sm" className="h-9 rounded-full px-4">
-                Open Vault
-                <ArrowRight className="ml-0.5 size-3.5" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteNav />
 
       {/* Hero */}
       <section className="relative isolate flex flex-1 items-center overflow-hidden">
