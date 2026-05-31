@@ -138,39 +138,19 @@ const Eyebrow = ({ children }: { children: React.ReactNode }) => (
 );
 
 const SLIDES = [
-  // 1 — Hook
-  <div key="s1" className="text-center">
-    <div className="mb-8 flex justify-center">
-      <VaultMark className="size-16 rounded-2xl" />
-    </div>
-    <Eyebrow>Krava Privacy Hackathon</Eyebrow>
-    <h1 className="mx-auto mt-5 max-w-3xl text-balance text-5xl font-semibold leading-[1.05] tracking-[-0.04em] md:text-7xl">
-      Your money. Your AI.
-      <br />
-      <span className="font-serif font-normal italic text-primary">
-        Nobody else&apos;s.
-      </span>
-    </h1>
-    <p className="mx-auto mt-7 max-w-xl text-balance text-lg text-white/60 md:text-xl">
-      Vault is a financial hub where privacy is{" "}
-      <span className="text-white">infrastructure</span> — not a pinky promise.
-    </p>
-  </div>,
-
-  // 2 — Problem
-  <div key="s2">
+  // 1 — The problem (lead with it)
+  <div key="s1">
     <Eyebrow>The problem</Eyebrow>
     <h2 className="mt-5 max-w-3xl text-balance text-4xl font-semibold leading-tight tracking-[-0.03em] md:text-6xl">
-      Useful AI apps quietly become{" "}
+      To get AI help with your money, you hand it to{" "}
       <span className="font-serif font-normal italic text-white/90">
-        surveillance
-      </span>{" "}
-      products.
+        big companies
+      </span>
+      .
     </h2>
     <p className="mt-6 max-w-2xl text-lg text-white/60">
-      To give you advice, today&apos;s finance tools ship your balances,
-      transactions and goals straight to OpenAI or Anthropic — and there they
-      get:
+      Today&apos;s finance tools ship your balances, transactions and goals
+      straight to OpenAI or Anthropic — where they&apos;re:
     </p>
     <div className="mt-8 flex flex-wrap gap-3">
       {["Logged", "Retained", "Trained on", "Tied to your name"].map((t) => (
@@ -184,25 +164,43 @@ const SLIDES = [
       ))}
     </div>
     <p className="mt-8 max-w-2xl text-pretty text-white/50">
-      Your most sensitive data becomes a breach waiting to happen.
+      Useful — and a surveillance product on the side. We don&apos;t want to
+      send our financial life to companies we just have to trust.
     </p>
   </div>,
 
-  // 3 — Solution
-  <div key="s3">
-    <Eyebrow>The Vault difference</Eyebrow>
-    <h2 className="mt-5 max-w-3xl text-balance text-4xl font-semibold leading-tight tracking-[-0.03em] md:text-6xl">
-      Private by{" "}
+  // 2 — The thesis + brand reveal
+  <div key="s2" className="text-center">
+    <div className="mb-8 flex justify-center">
+      <VaultMark className="size-16 rounded-2xl" />
+    </div>
+    <Eyebrow>You shouldn&apos;t have to trust them</Eyebrow>
+    <h1 className="mx-auto mt-5 max-w-3xl text-balance text-5xl font-semibold leading-[1.05] tracking-[-0.04em] md:text-7xl">
+      Your money. Your AI.
+      <br />
       <span className="font-serif font-normal italic text-primary">
-        architecture
+        Nobody else&apos;s.
+      </span>
+    </h1>
+    <p className="mx-auto mt-7 max-w-2xl text-balance text-lg text-white/60 md:text-xl">
+      Vault runs every AI interaction through{" "}
+      <span className="text-white">Krava</span> — encrypted, anonymized, and
+      zero-retention. You don&apos;t have to <span className="italic">trust</span>{" "}
+      that no one sees your data. By design,{" "}
+      <span className="text-white">no one can</span>.
+    </p>
+  </div>,
+
+  // 3 — Private by architecture
+  <div key="s3">
+    <Eyebrow>Private by architecture</Eyebrow>
+    <h2 className="mt-5 max-w-3xl text-balance text-4xl font-semibold leading-tight tracking-[-0.03em] md:text-6xl">
+      Not a promise — a{" "}
+      <span className="font-serif font-normal italic text-primary">
+        guarantee
       </span>
       .
     </h2>
-    <p className="mt-6 max-w-2xl text-lg text-white/60">
-      Every advisor prompt routes through{" "}
-      <span className="text-white">Krava</span> — so privacy is enforced in the
-      data flow, not promised in a policy.
-    </p>
     <div className="mt-9 grid gap-4 sm:grid-cols-2">
       {[
         { icon: Lock, t: "End-to-end encrypted", d: "AES-256-GCM at rest, keyed to your Krava identity." },
