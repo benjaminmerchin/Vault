@@ -16,7 +16,6 @@ import {
   Lock,
 } from "lucide-react";
 import { VaultLogo, VaultMark } from "@/components/brand/logo";
-import { DemoButton } from "@/components/auth/demo-button";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { cn } from "@/lib/utils";
 
@@ -250,15 +249,13 @@ const SLIDES = [
         </span>
       ))}
     </div>
-    <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-      <DemoButton
-        size="lg"
-        label="Launch the live demo"
-        className="h-12 rounded-full border-transparent bg-primary px-7 text-primary-foreground hover:bg-primary/90"
-      />
-      <a href="/" className="text-sm text-white/50 transition hover:text-white">
-        or visit the site
-        <ArrowRight className="ml-1 inline size-3.5" />
+    <div className="mt-10 flex justify-center">
+      <a
+        href="/"
+        className="inline-flex h-12 items-center gap-2 rounded-full bg-primary px-7 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+      >
+        Launch Vault
+        <ArrowRight className="size-4" />
       </a>
     </div>
     <p className="mt-8 font-mono text-xs uppercase tracking-[0.18em] text-white/30">
