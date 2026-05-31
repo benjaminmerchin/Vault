@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { useTransition } from "react";
-import { LogOut, ShieldCheck } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { signOutAction } from "@/lib/actions/auth";
 import { VaultLogo } from "@/components/brand/logo";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,13 +32,6 @@ export function AppNav({
         </Link>
 
         <div className="flex items-center gap-2">
-          <Link href="/privacy" className="hidden sm:block">
-            <Button variant="ghost" size="sm">
-              <ShieldCheck className="size-4" />
-              Privacy
-            </Button>
-          </Link>
-
           <DropdownMenu>
             <DropdownMenuTrigger className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
               <Avatar className="size-9 border border-border">
