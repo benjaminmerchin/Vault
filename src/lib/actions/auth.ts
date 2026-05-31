@@ -5,6 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 
 export type AuthState = { error?: string; message?: string };
 
+const REACH_ERR = "Couldn't reach the authentication service. Try again.";
+
 export async function signInAction(
   _prev: AuthState,
   formData: FormData,
@@ -14,8 +16,12 @@ export async function signInAction(
   if (!email || !password) return { error: "Email and password are required." };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: error.message };
+  try {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: error.message };
+  } catch {
+    return { error: REACH_ERR };
+  }
   redirect("/dashboard");
 }
 
@@ -30,27 +36,35 @@ export async function signUpAction(
     return { error: "Enter an email and a password of at least 6 characters." };
 
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { full_name: fullName } },
-  });
-  if (error) return { error: error.message };
+  let go = false;
+  try {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName } },
+    });
+    if (error) return { error: error.message };
 
-  // If the project doesn't require email confirmation, we have a session now.
-  if (data.session) redirect("/dashboard");
-
-  // Otherwise try an immediate password sign-in (works when confirmation is off).
-  const { error: signInErr } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-  if (!signInErr) redirect("/dashboard");
-
-  return {
-    message:
-      "Account created. Check your email to confirm — or jump in with the live demo.",
-  };
+    if (data.session) {
+      go = true;
+    } else {
+      // No session => email confirmation is on. Try an immediate sign-in.
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (!signInErr) go = true;
+      else
+        return {
+          message:
+            "Account created. Check your email to confirm — or jump in with the live demo.",
+        };
+    }
+  } catch {
+    return { error: REACH_ERR };
+  }
+  if (go) redirect("/dashboard");
+  return {};
 }
 
 export async function signInDemoAction(): Promise<AuthState> {
@@ -63,8 +77,12 @@ export async function signInDemoAction(): Promise<AuthState> {
     };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) return { error: `Demo sign-in failed: ${error.message}` };
+  try {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) return { error: `Demo sign-in failed: ${error.message}` };
+  } catch {
+    return { error: REACH_ERR };
+  }
   redirect("/dashboard");
 }
 
