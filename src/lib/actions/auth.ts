@@ -2,6 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { confirmUserEmail } from "@/lib/admin-db";
 
 export type AuthState = { error?: string; message?: string };
 
@@ -38,27 +40,42 @@ export async function signUpAction(
   const supabase = await createClient();
   let go = false;
   try {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName } },
-    });
-    if (error) return { error: error.message };
-
-    if (data.session) {
-      go = true;
-    } else {
-      // No session => email confirmation is on. Try an immediate sign-in.
+    const admin = createAdminClient();
+    if (admin) {
+      // Best path: create the user already-confirmed (no email sent at all).
+      const { error: adminErr } = await admin.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { full_name: fullName },
+      });
+      if (adminErr && !/already|registered|exists/i.test(adminErr.message))
+        return { error: adminErr.message };
       const { error: signInErr } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      if (!signInErr) go = true;
-      else
-        return {
-          message:
-            "Account created. Check your email to confirm — or jump in with the live demo.",
-        };
+      if (signInErr) return { error: signInErr.message };
+      go = true;
+    } else {
+      // Fallback: public signup, then force-confirm via the DB and sign in.
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: fullName } },
+      });
+      if (error) return { error: error.message };
+      if (data.session) {
+        go = true;
+      } else {
+        await confirmUserEmail(email);
+        const { error: signInErr } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (!signInErr) go = true;
+        else return { message: "Account created — you can sign in now." };
+      }
     }
   } catch {
     return { error: REACH_ERR };
