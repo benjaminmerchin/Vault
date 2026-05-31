@@ -108,6 +108,19 @@ export function AdvisorPanel() {
       ];
       setMessages(final);
       persist(final);
+      if (reply) {
+        // Update long-term, cross-chat memory (fire-and-forget).
+        fetch("/api/memory/extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: [
+              { role: "user", text: q },
+              { role: "assistant", text: reply },
+            ],
+          }),
+        }).catch(() => {});
+      }
     } catch (e) {
       const final: Msg[] = [
         ...withUser,

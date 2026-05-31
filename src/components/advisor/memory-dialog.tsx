@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Brain, Loader2, Lock, Sparkles } from "lucide-react";
+import { Brain, Loader2, Lock, Sparkles, Trash2, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,28 +11,29 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-type Memory = { id: string; content: string; contentType: string; createdAt: string };
-
 export function MemoryButton() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [remembered, setRemembered] = useState<string[]>([]);
   const [facts, setFacts] = useState<string[]>([]);
-  const [memories, setMemories] = useState<Memory[]>([]);
-  const [note, setNote] = useState<string | undefined>();
 
   async function load() {
     setLoading(true);
     try {
       const r = await fetch("/api/memory");
       const d = await r.json();
+      setRemembered(Array.isArray(d.remembered) ? d.remembered : []);
       setFacts(Array.isArray(d.facts) ? d.facts : []);
-      setMemories(Array.isArray(d.memories) ? d.memories : []);
-      setNote(d.note);
     } catch {
       /* ignore */
     } finally {
       setLoading(false);
     }
+  }
+
+  async function forget() {
+    setRemembered([]);
+    await fetch("/api/memory", { method: "DELETE" }).catch(() => {});
   }
 
   return (
@@ -58,8 +59,8 @@ export function MemoryButton() {
               What Vault remembers about you
             </DialogTitle>
             <DialogDescription>
-              The private context your advisor reasons over — derived from your
-              encrypted vault. Only you can read it.
+              Long-term memory learned across your chats, plus context from your
+              accounts — all encrypted in your vault. Only you can read it.
             </DialogDescription>
           </DialogHeader>
 
@@ -68,42 +69,58 @@ export function MemoryButton() {
               <Loader2 className="size-5 animate-spin" />
             </div>
           ) : (
-            <div className="max-h-[60vh] space-y-4 overflow-y-auto">
-              <ul className="space-y-2">
-                {facts.map((f, i) => (
-                  <li
-                    key={i}
-                    className="flex gap-2.5 rounded-xl border border-border bg-card/50 px-3.5 py-2.5 text-sm"
-                  >
-                    <Sparkles className="mt-0.5 size-3.5 shrink-0 text-primary" />
-                    <span>{f}</span>
-                  </li>
-                ))}
-                {facts.length === 0 && (
-                  <li className="text-sm text-muted-foreground">
-                    Nothing yet — add accounts or load a portfolio and your
-                    advisor will have context to remember.
-                  </li>
-                )}
-              </ul>
-
-              {memories.length > 0 && (
-                <div>
-                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Saved memories (Krava)
+            <div className="max-h-[60vh] space-y-5 overflow-y-auto">
+              <section>
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    <Brain className="size-3.5 text-primary" /> Remembered from your chats
                   </p>
-                  <ul className="space-y-1.5">
-                    {memories.map((m) => (
+                  {remembered.length > 0 && (
+                    <button
+                      onClick={forget}
+                      className="inline-flex items-center gap-1 text-xs text-muted-foreground transition hover:text-destructive"
+                    >
+                      <Trash2 className="size-3.5" /> Forget all
+                    </button>
+                  )}
+                </div>
+                {remembered.length > 0 ? (
+                  <ul className="space-y-2">
+                    {remembered.map((m, i) => (
                       <li
-                        key={m.id}
-                        className="rounded-xl border border-border px-3.5 py-2.5 text-sm"
+                        key={i}
+                        className="flex gap-2.5 rounded-xl border border-primary/20 bg-primary/5 px-3.5 py-2.5 text-sm"
                       >
-                        {m.content}
+                        <Sparkles className="mt-0.5 size-3.5 shrink-0 text-primary" />
+                        <span>{m}</span>
                       </li>
                     ))}
                   </ul>
-                </div>
-              )}
+                ) : (
+                  <p className="rounded-xl border border-dashed border-border px-3.5 py-3 text-sm text-muted-foreground">
+                    Nothing yet — as you chat with your advisor, it remembers
+                    durable things (goals, plans, preferences) here and uses them
+                    in future conversations.
+                  </p>
+                )}
+              </section>
+
+              <section>
+                <p className="mb-2 flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <Wallet className="size-3.5 text-primary" /> From your accounts
+                </p>
+                <ul className="space-y-2">
+                  {facts.map((f, i) => (
+                    <li
+                      key={i}
+                      className="flex gap-2.5 rounded-xl border border-border bg-card/50 px-3.5 py-2.5 text-sm"
+                    >
+                      <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-muted-foreground/50" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
 
               <p className="flex items-center gap-1.5 border-t border-border pt-3 text-[11px] text-muted-foreground">
                 <Lock className="size-3 shrink-0 text-primary" />

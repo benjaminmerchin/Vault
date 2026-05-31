@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { encryptJSON, decryptJSON } from "@/lib/chat-store";
+import { getKravaIdentity } from "@/lib/krava";
+import { deriveUserKey, encryptJSON, decryptJSON } from "@/lib/chat-store";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -27,7 +28,8 @@ export async function GET() {
 
   if (!data) return NextResponse.json({ chatId: null, messages: [] });
   try {
-    const messages = decryptJSON<Msg[]>(data.payload, data.iv);
+    const { userId: kravaUserId } = await getKravaIdentity(user.id);
+    const messages = decryptJSON<Msg[]>(data.payload, data.iv, deriveUserKey(kravaUserId));
     return NextResponse.json({ chatId: data.chat_id ?? null, messages });
   } catch {
     return NextResponse.json({ chatId: null, messages: [] });
@@ -45,7 +47,8 @@ export async function POST(req: NextRequest) {
   const messages = Array.isArray(body.messages) ? (body.messages as Msg[]) : [];
   const chatId = typeof body.chatId === "string" ? body.chatId : null;
 
-  const { payload, iv } = encryptJSON(messages);
+  const { userId: kravaUserId } = await getKravaIdentity(user.id);
+  const { payload, iv } = encryptJSON(messages, deriveUserKey(kravaUserId));
   const { error } = await supabase.from("advisor_chats").upsert({
     user_id: user.id,
     chat_id: chatId,

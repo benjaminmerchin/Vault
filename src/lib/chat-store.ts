@@ -1,14 +1,19 @@
 import "server-only";
 import crypto from "node:crypto";
 
-// AES-256-GCM. The key is derived from CHAT_ENC_KEY so the value can be any
-// string; the database only ever stores the resulting ciphertext.
-const key = crypto
-  .createHash("sha256")
-  .update(process.env.CHAT_ENC_KEY ?? "vault-dev-key")
-  .digest();
+// Per-user AES-256-GCM. The key is derived from the user's stable Krava
+// identity (their own key) salted with a server secret, so every user's data
+// is encrypted under a distinct key — the database only ever stores ciphertext.
+const SALT = process.env.CHAT_ENC_KEY ?? "vault-dev-key";
 
-export function encryptJSON(value: unknown): { payload: string; iv: string } {
+export function deriveUserKey(kravaUserId: string): Buffer {
+  return crypto.createHash("sha256").update(`${SALT}:${kravaUserId}`).digest();
+}
+
+export function encryptJSON(
+  value: unknown,
+  key: Buffer,
+): { payload: string; iv: string } {
   const iv = crypto.randomBytes(12);
   const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
   const data = Buffer.concat([
@@ -22,7 +27,7 @@ export function encryptJSON(value: unknown): { payload: string; iv: string } {
   };
 }
 
-export function decryptJSON<T>(payload: string, iv: string): T {
+export function decryptJSON<T>(payload: string, iv: string, key: Buffer): T {
   const buf = Buffer.from(payload, "base64");
   const tag = buf.subarray(buf.length - 16);
   const data = buf.subarray(0, buf.length - 16);

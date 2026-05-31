@@ -1,6 +1,8 @@
 import type { NextRequest } from "next/server";
 import { getFinanceSnapshot, buildAdvisorSystem } from "@/lib/finance";
-import { getKravaUserToken, streamKravaChat } from "@/lib/krava";
+import { getKravaIdentity, streamKravaChat } from "@/lib/krava";
+import { deriveUserKey } from "@/lib/chat-store";
+import { getMemories } from "@/lib/memory-store";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -23,19 +25,29 @@ export async function POST(req: NextRequest) {
   const chatId = typeof body.chatId === "string" ? body.chatId : undefined;
   if (!message) return new Response("Message required", { status: 400 });
 
-  const snap = await getFinanceSnapshot();
-  const system = snap
-    ? buildAdvisorSystem(snap)
-    : "You are Vault, a private, privacy-first financial advisor.";
-
+  let kravaUserId: string;
   let userToken: string;
   try {
-    userToken = await getKravaUserToken(user.id);
+    ({ userId: kravaUserId, userToken } = await getKravaIdentity(user.id));
   } catch (e) {
     return new Response(
       `Could not provision Krava session: ${(e as Error).message}`,
       { status: 502 },
     );
+  }
+
+  const [snap, remembered] = await Promise.all([
+    getFinanceSnapshot(),
+    getMemories(supabase, user.id, deriveUserKey(kravaUserId)),
+  ]);
+  let system = snap
+    ? buildAdvisorSystem(snap)
+    : "You are Vault, a private, privacy-first financial advisor.";
+  if (remembered.length) {
+    system +=
+      `\n\n=== What you remember about this user from past conversations ===\n` +
+      remembered.map((m) => `- ${m}`).join("\n") +
+      `\nUse these naturally when relevant; don't recite them back unless asked.`;
   }
 
   const upstream = await streamKravaChat(

@@ -102,6 +102,19 @@ drop policy if exists owner_all on public.advisor_chats;
 create policy owner_all on public.advisor_chats
   using (user_id = auth.uid()) with check (user_id = auth.uid());
 
+-- Long-term advisor memory across ALL chats: an encrypted list of durable
+-- facts the advisor has learned about the user. Ciphertext only.
+create table if not exists public.advisor_memories (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  payload text not null,
+  iv text not null,
+  updated_at timestamptz not null default now()
+);
+alter table public.advisor_memories enable row level security;
+drop policy if exists owner_all on public.advisor_memories;
+create policy owner_all on public.advisor_memories
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
+
 do $$
 declare t text;
 begin
