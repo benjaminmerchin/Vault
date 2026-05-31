@@ -9,10 +9,10 @@ import { cn } from "@/lib/utils";
 type Msg = { role: "user" | "assistant"; text: string };
 
 const SUGGESTIONS = [
-  "What should I pay off first?",
-  "Where am I overspending?",
-  "Can I afford a $6k trip to Japan?",
-  "Am I saving enough each month?",
+  "List all my subscriptions, largest first",
+  "How can I reduce my upcoming tax bill?",
+  "Can I afford a home and the monthly payments?",
+  "Are my holdings right for today's market?",
 ];
 
 export function AdvisorPanel() {
