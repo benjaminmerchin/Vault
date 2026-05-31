@@ -54,16 +54,17 @@ export async function signUpAction(
 }
 
 export async function signInDemoAction(): Promise<AuthState> {
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email: process.env.DEMO_EMAIL!,
-    password: process.env.DEMO_PASSWORD!,
-  });
-  if (error)
+  const email = process.env.DEMO_EMAIL;
+  const password = process.env.DEMO_PASSWORD;
+  if (!email || !password)
     return {
       error:
-        "Demo account isn't ready yet. Run the seed script (pnpm seed) and try again.",
+        "Demo isn't configured — set DEMO_EMAIL and DEMO_PASSWORD in the environment.",
     };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return { error: `Demo sign-in failed: ${error.message}` };
   redirect("/dashboard");
 }
 
