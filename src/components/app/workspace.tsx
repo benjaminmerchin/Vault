@@ -1,7 +1,8 @@
 "use client";
 
-import { Lock, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { AdvisorPanel } from "@/components/advisor/advisor-panel";
+import { MemoryButton } from "@/components/advisor/memory-dialog";
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -30,13 +31,10 @@ export function Workspace({ children }: { children: React.ReactNode }) {
         className="min-w-0"
       >
         <aside className="flex h-full flex-col bg-card/30">
-          <div className="flex items-center gap-2 border-b border-border px-4 py-3 text-sm font-medium">
+          <div className="flex items-center gap-2 border-b border-border px-4 py-2.5 text-sm font-medium">
             <Sparkles className="size-4 text-primary" />
             Vault Advisor
-            <span className="ml-auto inline-flex items-center gap-1 text-xs font-normal text-muted-foreground">
-              <Lock className="size-3" />
-              Private
-            </span>
+            <MemoryButton />
           </div>
           <div className="min-h-0 flex-1 px-4">
             <AdvisorPanel />

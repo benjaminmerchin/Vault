@@ -88,6 +88,58 @@ export async function getFinanceSnapshot(): Promise<FinanceSnapshot | null> {
 const money = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 
+/** Human-readable facts the advisor knows about the user (from the encrypted vault). */
+export function buildMemoryFacts(snap: FinanceSnapshot): string[] {
+  const { totals, accounts, holdings, goals, transactions, profile } = snap;
+  const facts: string[] = [];
+
+  if (profile?.full_name) facts.push(`You are ${profile.full_name}.`);
+  if (totals.monthlyIncome)
+    facts.push(`Your take-home income is about ${money(totals.monthlyIncome)} / month.`);
+  facts.push(
+    `Your net worth is ${money(totals.netWorth)} — ${money(totals.assets)} in assets and ${money(
+      totals.liabilities,
+    )} in debts.`,
+  );
+  if (totals.investments)
+    facts.push(
+      `You hold ${money(totals.investments)} in investments across ${holdings.length} position${
+        holdings.length === 1 ? "" : "s"
+      }.`,
+    );
+
+  const debts = accounts
+    .filter((a) => a.kind === "liability" && a.apr)
+    .sort((a, b) => (b.apr ?? 0) - (a.apr ?? 0));
+  if (debts[0])
+    facts.push(
+      `Your priciest debt is ${debts[0].name} at ${debts[0].apr}% APR (${money(debts[0].balance)}).`,
+    );
+
+  for (const g of goals.slice(0, 3)) {
+    const pct = g.target_amount
+      ? Math.round((g.current_amount / g.target_amount) * 100)
+      : 0;
+    facts.push(`Goal “${g.name}”: ${money(g.current_amount)} of ${money(g.target_amount)} (${pct}%).`);
+  }
+
+  const since = new Date();
+  since.setDate(since.getDate() - 30);
+  const byCat = new Map<string, number>();
+  for (const t of transactions) {
+    if (t.amount >= 0 || t.category === "Transfers" || t.category === "Income") continue;
+    if (new Date(t.posted_at + "T00:00:00") < since) continue;
+    byCat.set(t.category, (byCat.get(t.category) ?? 0) + Math.abs(t.amount));
+  }
+  const top = [...byCat.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+  if (top.length)
+    facts.push(
+      `Lately you spend most on ${top.map(([c, v]) => `${c} (${money(v)})`).join(", ")}.`,
+    );
+
+  return facts;
+}
+
 /** Build the advisor's system prompt with the user's private financial context. */
 export function buildAdvisorSystem(snap: FinanceSnapshot): string {
   const { totals, accounts, holdings, goals, transactions } = snap;
